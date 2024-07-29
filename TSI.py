@@ -33,28 +33,36 @@ if uploaded_file is not None:
     st.write("Hochgeladene Aktienliste:")
     st.write(stock_df)
 
-    # Platzhalter für Börsenkursdaten
-    stock_df['Close Prices'] = None
+    # Verfügbare Spalten überprüfen
+    st.write("Verfügbare Spalten:")
+    st.write(stock_df.columns)
 
-    # Börsenkurse der letzten 14 Tage abrufen
-    end_date = datetime.today()
-    start_date = end_date - timedelta(days=21)  # 14 Handelstage innerhalb von 21 Kalendertagen
+    # Überprüfen, ob die erforderlichen Spalten vorhanden sind
+    if 'Ticker' in stock_df.columns and 'Bezeichnung' in stock_df.columns:
+        # Platzhalter für Börsenkursdaten
+        stock_df['Close Prices'] = None
 
-    for index, row in stock_df.iterrows():
-        ticker = row['Ticker']
-        bezeichnung = row['Bezeichnung']
-        data = yf.download(ticker, start=start_date, end=end_date)
-        close_prices = data['Close'].iloc[-14:]
-        stock_df.at[index, 'Close Prices'] = close_prices.values
+        # Börsenkurse der letzten 14 Tage abrufen
+        end_date = datetime.today()
+        start_date = end_date - timedelta(days=21)  # 14 Handelstage innerhalb von 21 Kalendertagen
 
-    st.write("Börsenkursdaten der letzten 14 Tage:")
-    for index, row in stock_df.iterrows():
-        st.write(f"{row['Bezeichnung']} ({row['Ticker']}): {row['Close Prices']}")
+        for index, row in stock_df.iterrows():
+            ticker = row['Ticker']
+            bezeichnung = row['Bezeichnung']
+            data = yf.download(ticker, start=start_date, end=end_date)
+            close_prices = data['Close'].iloc[-14:]
+            stock_df.at[index, 'Close Prices'] = close_prices.values
 
-    if st.sidebar.button("TSI Werte berechnen"):
-        # Berechnung der TSI-Werte
-        stock_df['TSI Wert'] = stock_df.apply(lambda row: calculate_tsi(pd.Series(row['Close Prices'])), axis=1)
-        st.write("TSI Werte der Aktien:")
-        st.write(stock_df[['Ticker', 'Bezeichnung', 'TSI Wert']])
+        st.write("Börsenkursdaten der letzten 14 Tage:")
+        for index, row in stock_df.iterrows():
+            st.write(f"{row['Bezeichnung']} ({row['Ticker']}): {row['Close Prices']}")
+
+        if st.sidebar.button("TSI Werte berechnen"):
+            # Berechnung der TSI-Werte
+            stock_df['TSI Wert'] = stock_df.apply(lambda row: calculate_tsi(pd.Series(row['Close Prices'])), axis=1)
+            st.write("TSI Werte der Aktien:")
+            st.write(stock_df[['Ticker', 'Bezeichnung', 'TSI Wert']])
+    else:
+        st.write("Die erforderlichen Spalten 'Ticker' und 'Bezeichnung' sind nicht in der hochgeladenen Datei vorhanden.")
 
 st.sidebar.write("Die Börsenkurse werden automatisch von Yahoo Finance abgerufen.")
