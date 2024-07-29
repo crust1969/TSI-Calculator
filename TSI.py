@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 def calculate_rsi(changes, period=14):
     gains = changes[changes > 0].sum() / period
     losses = -changes[changes < 0].sum() / period
+    if losses == 0:
+        return 100
     rs = gains / losses
     rsi = 100 - (100 / (1 + rs))
     return rsi
