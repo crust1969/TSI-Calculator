@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 def ema(series, period):
     return series.ewm(span=period, adjust=False).mean()
 
-# Funktion zur Berechnung des TSI-Werts
+# Funktion zur Berechnung des TSI-Werts und Zwischenergebnisse
 def calculate_tsi(close_prices, r=25, s=13):
     delta = close_prices.diff()
     abs_delta = delta.abs()
@@ -19,7 +19,8 @@ def calculate_tsi(close_prices, r=25, s=13):
     abs_ema2 = ema(abs_ema1, s)
 
     tsi = 100 * (ema2 / abs_ema2)
-    return tsi.iloc[-1]
+    
+    return tsi.iloc[-1], ema1.iloc[-1], ema2.iloc[-1], abs_ema1.iloc[-1], abs_ema2.iloc[-1]
 
 st.sidebar.title("TSI Berechnung")
 
@@ -63,10 +64,12 @@ if uploaded_file is not None:
         st.write(close_prices_df)
 
         if st.sidebar.button("TSI Werte berechnen"):
-            # Berechnung der TSI-Werte
-            stock_df['TSI Wert'] = stock_df.apply(lambda row: calculate_tsi(pd.Series(row['Close Prices'])), axis=1)
-            st.write("TSI Werte der Aktien:")
-            st.write(stock_df[['Ticker', 'Bezeichnung', 'TSI Wert']])
+            # Berechnung der TSI-Werte und Zwischenergebnisse
+            results = stock_df.apply(lambda row: calculate_tsi(pd.Series(row['Close Prices'])), axis=1)
+            stock_df['TSI Wert'], stock_df['EMA1'], stock_df['EMA2'], stock_df['Abs_EMA1'], stock_df['Abs_EMA2'] = zip(*results)
+
+            st.write("TSI Werte und Zwischenergebnisse der Aktien:")
+            st.write(stock_df[['Ticker', 'Bezeichnung', 'TSI Wert', 'EMA1', 'EMA2', 'Abs_EMA1', 'Abs_EMA2']])
     else:
         st.write("Die erforderlichen Spalten 'Ticker' und 'Bezeichnung' sind nicht in der hochgeladenen Datei vorhanden.")
 
