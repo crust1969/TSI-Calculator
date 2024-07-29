@@ -3,24 +3,23 @@ import pandas as pd
 import yfinance as yf
 from datetime import datetime, timedelta
 
-# Funktion zur Berechnung des RSI
-def calculate_rsi(changes, period=14):
-    gains = changes[changes > 0].sum() / period
-    losses = -changes[changes < 0].sum() / period
-    if losses == 0:
-        return 100
-    rs = gains / losses
-    rsi = 100 - (100 / (1 + rs))
-    return rsi
+# Funktion zur Berechnung des exponentiell gleitenden Durchschnitts (EMA)
+def ema(series, period):
+    return series.ewm(span=period, adjust=False).mean()
 
 # Funktion zur Berechnung des TSI-Werts
-def calculate_tsi(close_prices):
-    changes = close_prices.diff().dropna()
-    rsi = calculate_rsi(changes)
-    short_ma = close_prices.rolling(window=10).mean().iloc[-1]
-    long_ma = close_prices.rolling(window=50).mean().iloc[-1]
-    tsi = (rsi + short_ma + long_ma) / 3
-    return tsi
+def calculate_tsi(close_prices, r=25, s=13):
+    delta = close_prices.diff()
+    abs_delta = delta.abs()
+
+    ema1 = ema(delta, r)
+    ema2 = ema(ema1, s)
+    
+    abs_ema1 = ema(abs_delta, r)
+    abs_ema2 = ema(abs_ema1, s)
+
+    tsi = 100 * (ema2 / abs_ema2)
+    return tsi.iloc[-1]
 
 st.sidebar.title("TSI Berechnung")
 
@@ -53,6 +52,9 @@ if uploaded_file is not None:
             bezeichnung = row['Bezeichnung']
             data = yf.download(ticker, start=start_date, end=end_date)
             close_prices = data['Close'].iloc[-14:]
+            if len(close_prices) < 14:
+                st.write(f"Nicht genügend Daten für {bezeichnung} ({ticker})")
+                continue
             stock_df.at[index, 'Close Prices'] = close_prices.values
             close_prices_dict[bezeichnung] = close_prices
 
