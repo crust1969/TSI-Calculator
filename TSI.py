@@ -46,16 +46,19 @@ if uploaded_file is not None:
         end_date = datetime.today()
         start_date = end_date - timedelta(days=21)  # 14 Handelstage innerhalb von 21 Kalendertagen
 
+        close_prices_dict = {}
+
         for index, row in stock_df.iterrows():
             ticker = row['Ticker']
             bezeichnung = row['Bezeichnung']
             data = yf.download(ticker, start=start_date, end=end_date)
             close_prices = data['Close'].iloc[-14:]
             stock_df.at[index, 'Close Prices'] = close_prices.values
+            close_prices_dict[bezeichnung] = close_prices
 
         st.write("Börsenkursdaten der letzten 14 Tage:")
-        for index, row in stock_df.iterrows():
-            st.write(f"{row['Bezeichnung']} ({row['Ticker']}): {row['Close Prices']}")
+        close_prices_df = pd.DataFrame(close_prices_dict)
+        st.write(close_prices_df)
 
         if st.sidebar.button("TSI Werte berechnen"):
             # Berechnung der TSI-Werte
