@@ -70,6 +70,21 @@ if uploaded_file is not None:
 
             st.write("TSI Werte und Zwischenergebnisse der Aktien:")
             st.write(stock_df[['Ticker', 'Bezeichnung', 'TSI Wert', 'EMA1', 'EMA2', 'Abs_EMA1', 'Abs_EMA2']])
+            
+            # Anzeige der Formel
+            st.markdown("""
+            **Formel zur Berechnung des TSI:**
+
+            \[
+            \text{TSI} = 100 \times \left( \frac{\text{EMA}(\text{EMA}(\Delta \text{Close}, 25), 13)}{\text{EMA}(\text{EMA}(|\Delta \text{Close}|, 25), 13)} \right)
+            \]
+
+            **Zwischenergebnisse:**
+            - \(\text{EMA1} = \text{EMA}(\Delta \text{Close}, 25)\)
+            - \(\text{EMA2} = \text{EMA}(\text{EMA1}, 13)\)
+            - \(\text{Abs\_EMA1} = \text{EMA}(|\Delta \text{Close}|, 25)\)
+            - \(\text{Abs\_EMA2} = \text{EMA}(\text{Abs\_EMA1}, 13)\)
+            """)
     else:
         st.write("Die erforderlichen Spalten 'Ticker' und 'Bezeichnung' sind nicht in der hochgeladenen Datei vorhanden.")
 
