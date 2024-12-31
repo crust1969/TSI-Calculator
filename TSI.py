@@ -23,6 +23,8 @@ def best_90_day_periods(df):
 
     # Um die Spaltenüberschriften klar zu machen und zusätzlich den Monat anzuzeigen
     result_df = result_df[['Close', '90_day_return', 'Year', 'Month']]
+    
+    # Klarere Spaltenüberschriften
     result_df.columns = ['Schlusskurs', '90-Tage-Rendite (%)', 'Jahr', 'Monat']
     
     return result_df
@@ -51,4 +53,3 @@ def main():
 # Hauptfunktion starten
 if __name__ == "__main__":
     main()
- 
