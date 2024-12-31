@@ -13,12 +13,14 @@ def best_90_day_periods(df):
     df['Month'] = df.index.month
     best_periods = []
 
+    # Iteriere über jedes Jahr, um die besten Perioden zu finden
     for year in df['Year'].unique():
         yearly_data = df[df['Year'] == year]
-        max_return = yearly_data['90_day_return'].max()
+        max_return = yearly_data['90_day_return'].max()  # Höchste 90-Tage-Rendite des Jahres
         best_period = yearly_data[yearly_data['90_day_return'] == max_return]
         best_periods.append(best_period)
 
+    # Füge alle besten Perioden zusammen
     result_df = pd.concat(best_periods)
 
     # Um die Spaltenüberschriften klar zu machen und zusätzlich den Monat anzuzeigen
@@ -53,3 +55,4 @@ def main():
 # Hauptfunktion starten
 if __name__ == "__main__":
     main()
+
