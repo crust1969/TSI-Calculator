@@ -7,9 +7,10 @@ def calculate_90_day_returns(df):
     df['90_day_return'] = df['Close'].pct_change(periods=90) * 100
     return df
 
-# Funktion zur Berechnung der besten 90-Tage-Perioden pro Jahr
+# Funktion zur Berechnung der besten 90-Tage-Perioden pro Jahr und Monat
 def best_90_day_periods(df):
     df['Year'] = df.index.year
+    df['Month'] = df.index.month
     best_periods = []
 
     for year in df['Year'].unique():
@@ -18,7 +19,13 @@ def best_90_day_periods(df):
         best_period = yearly_data[yearly_data['90_day_return'] == max_return]
         best_periods.append(best_period)
 
-    return pd.concat(best_periods)
+    result_df = pd.concat(best_periods)
+
+    # Um die Spaltenüberschriften klar zu machen und zusätzlich den Monat anzuzeigen
+    result_df = result_df[['Close', '90_day_return', 'Year', 'Month']]
+    result_df.columns = ['Schlusskurs', '90-Tage-Rendite (%)', 'Jahr', 'Monat']
+    
+    return result_df
 
 # Streamlit App
 def main():
@@ -34,16 +41,13 @@ def main():
         # Berechnung der 90-Tage-Rendite
         df_with_returns = calculate_90_day_returns(df)
 
-        # Berechnung der besten 90-Tage-Perioden pro Jahr
+        # Berechnung der besten 90-Tage-Perioden pro Jahr und Monat
         best_periods = best_90_day_periods(df_with_returns)
 
         # Ergebnisse anzeigen
         st.subheader(f"Die besten 90-Tage-Perioden für {ticker}")
-        st.dataframe(best_periods[['Close', '90_day_return', 'Year']])
+        st.dataframe(best_periods)
 
 # Hauptfunktion starten
 if __name__ == "__main__":
     main()
-
-
-  
